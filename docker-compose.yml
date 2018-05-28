@@ -1,0 +1,38 @@
+version: '3'
+services:
+    db:
+        container_name: db
+        image: postgres
+        environment:
+               - POSTGRES_DB=greetings
+               - POSTGRES_USER=user
+               - POSTGRES_PASSWORD=password
+        ports:
+               - "5432:5432"
+#        volumes:
+#               - ./data:/var/lib/postgresql/data
+    app:
+        container_name: app
+        image: python:3.7-rc
+        depends_on:
+               - db
+        expose:
+               - "5000"
+        environment:
+               - DB_URL=postgresql://user:password@db:5432/greetings
+        volumes:
+               - ./greetings_app/:/greetings_app/
+        command: /bin/bash -c "pip install -r /greetings_app/requirements.txt && python /greetings_app/app.py"
+        ports:
+               - "5000:5000"
+
+    nginx:
+        container_name: nginx
+        image: nginx
+        depends_on:
+               - app
+        ports:
+               - "8080:80"
+        volumes:
+               - ./greetings_app/conf.d:/etc/nginx/conf.d
+
