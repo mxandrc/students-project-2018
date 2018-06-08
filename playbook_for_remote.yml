@@ -1,0 +1,75 @@
+- hosts: [remote]
+  vars_files:
+    - "{{ playbook_dir }}/main.yml"
+  gather_facts: no
+  vars:
+    - dir: /root
+  become: yes
+  tasks:
+    - name: Copy app
+      copy:
+        src: "{{ playbook_dir }}/greetings_app"
+        dest: "{{dir}}/"
+
+    - name: Copy proxy.conf
+      copy:
+        src: "{{ playbook_dir }}//greetings_app/conf.d/"
+        dest: "{{dir}}/greetings_app/"
+
+    - name: Clear old db
+      docker_container:
+        name: db
+        state: absent
+
+    - name: Clear old app
+      docker_container:
+        name: app
+        state: absent
+
+    - name: Clear old nginx
+      docker_container:
+        name: nginx
+        state: absent    
+
+    - name: Create and start new docker containers
+      docker_service:
+        recreate: always
+        project_name: homework
+        definition:
+          version: '3'
+          services:
+            db:
+                image: postgres
+                container_name: db
+                environment:
+                    - POSTGRES_DB=greetings
+                    - POSTGRES_USER=user
+                    - POSTGRES_PASSWORD=password
+                ports:
+                    - "5432:5432"
+  
+            app:
+                build: "{{dir}}" 
+                container_name: app
+                image: python:3.7-rc
+                depends_on:
+                    - db
+                expose:
+                    - "5000"
+                environment:
+                    - "DB_URL=postgresql://{{db_login}}:{{db_password}}@db:5432/greetings"
+                volumes:
+                    - "{{dir}}/greetings_app/:/greetings_app/"
+                command: /bin/bash -c "pip install -r /greetings_app/requirements.txt && python /greetings_app/app.py"
+                ports:
+                    - "5000:5000"
+
+            nginx:
+                container_name: nginx
+                image: nginx
+                depends_on:
+                    - app
+                ports:
+                    - "80:80"
+                volumes:
+                    - "{{dir}}/greetings_app/conf.d/:/etc/nginx/conf.d"
