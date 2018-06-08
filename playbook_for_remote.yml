@@ -43,8 +43,8 @@
                 container_name: db
                 environment:
                     - POSTGRES_DB=greetings
-                    - POSTGRES_USER=user
-                    - POSTGRES_PASSWORD=password
+                    - POSTGRES_USER={{db_login}}
+                    - POSTGRES_PASSWORD={{db_password}}
                 ports:
                     - "5432:5432"
   
