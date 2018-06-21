@@ -14,6 +14,6 @@ pipelineJob("CI-job") {
         }
     }
 	triggers {
-        scm('H/2 * * * *')
+        scm('H/1 * * * *')
     }
 }
