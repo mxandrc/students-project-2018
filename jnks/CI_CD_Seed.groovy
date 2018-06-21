@@ -7,13 +7,13 @@ pipelineJob("CI-job") {
                         url('https://github.com/mxandrc/students-project-2018.git')
                         credentials('mxandrc')
                     }
-                    branch('refs/tags/*.*')
+                    branch('.git/refs/tags/*.*')
                 }
             }
             scriptPath("jnks/CI_job.groovy")
         }
     }
 	triggers {
-        scm('H/1 * * * *')
+        scm('H/2 * * * *')
     }
 }
