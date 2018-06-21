@@ -37,7 +37,7 @@ node {
 			sh "docker run --rm --name $CONTAINER_NAME $CONTAINER_NAME:$TAG"
 			sleep 10
 			sh "docker exec $CONTAINER_NAME python greetings_app/test_selects.py"
-			status = sh(returnStdout: true, script: "echo $?").trim()
+			status = sh(returnStdout: true, script: "echo \$?").trim()
 				if (status != '0'){
 				currentBuild.result = 'FAILED'
 				sh "exit ${status}"
